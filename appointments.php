@@ -223,10 +223,21 @@ if ( ! class_exists( 'Appointments' ) ) {
 			if ( false === $this->gcal_api && ! defined( 'APP_GCAL_DISABLE' ) ) {
 				require_once appointments_plugin_dir() . 'includes/class-app-gcal.php';
 				$this->gcal_api = new Appointments_Google_Calendar();
+				// ADDED BY MIKKEL
+				$this->updateGoogleEntries();
 			}
 			return $this->gcal_api;
 		}
 
+ // CUSTOM CODE ADDED MY MIKKEL START
+ function updateGoogleEntries() {
+	if ( is_object( $this->gcal_api ) ) {
+		if (strpos($_SERVER['REQUEST_URI'], 'reserver-tid') !== false && strpos($_SERVER['REQUEST_URI'], 'reserver-tid/?') === false) {
+			$this->gcal_api->importFromMikkel();
+		}
+	}
+}
+// CUSTOM CODE ADDED MY MIKKEL END
 
 
 		/**

@@ -479,8 +479,13 @@ class Appointments_Google_Calendar {
 
 		// Dates
 		$start = new Google_Service_Calendar_EventDateTime();
+		// MIKKEL CHANGED THIS
+		$start->setTimeZone('Europe/Copenhagen');
 		$start->setDateTime( $app->get_start_gmt_date( "Y-m-d\TH:i:s\Z" ) );
+
 		$end = new Google_Service_Calendar_EventDateTime();
+		// MIKKEL CHANGED THIS
+		$end->setTimeZone('Europe/Copenhagen');
 		$end->setDateTime( $app->get_end_gmt_date( "Y-m-d\TH:i:s\Z" ) );
 
 		// Email
@@ -585,7 +590,38 @@ class Appointments_Google_Calendar {
 		wp_send_json( array( 'message' => sprintf( __( '%d updated, %d new inserted and %d deleted', 'appointments' ), $results['updated'], $results['inserted'], $results['deleted'] ) ) );
 	}
 
+// MIKKEL DID THIS START 
+public function importFromMikkel() {
+	$import_modes = array( 'sync', 'gcal2app' );
 
+	if ( ! in_array( $this->get_api_mode(), $import_modes ) ) {
+		wp_send_json( array( 'message' => 'Error' ) );
+	}
+
+	include_once( 'gcal/class-app-gcal-importer.php' );
+	$importer = new Appointments_Google_Calendar_Importer( $this );
+	$this->remove_appointments_hooks();
+	$results = $importer->import();
+	$this->add_appointments_hooks();
+
+	/*if ( $this->workers_allowed() ) {
+		$workers = appointments_get_workers();
+		foreach ( $workers as $worker ) {
+			$switched = $this->switch_to_worker( $worker->ID );
+			if ( $switched ) {
+				$worker_results = $importer->import( $worker->ID );
+				if ( ! is_wp_error( $worker_results ) ) {
+					$results['inserted'] += $worker_results['inserted'];
+					$results['updated'] += $worker_results['updated'];
+					$results['deleted'] += $worker_results['deleted'];
+				}
+				$this->restore_to_default();
+			}
+
+		}
+	}*/
+}
+// MIKKEL DID THIS END
 
 
 	function get_apps_to_export_count() {
